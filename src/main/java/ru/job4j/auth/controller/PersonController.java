@@ -1,5 +1,6 @@
 package ru.job4j.auth.controller;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.util.Streamable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import ru.job4j.auth.repository.PersonRepository;
 import ru.job4j.auth.service.PersonService;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Rest контроллер для Person
@@ -64,11 +66,20 @@ public class PersonController {
      * Сервис обновляет сущность Person в хранилище сервера
      * @param person - сохраняемая сущность тип {@link ru.job4j.auth.model.Person}
      * @return тип {@link org.springframework.http.ResponseEntity<java.lang.Void>}
+     *  status = 304 - не изменено. Если не поменялось содержимое.
      */
     @PutMapping("/")
     public ResponseEntity<Void> update(@RequestBody Person person) {
-        this.persons.update(person);
-        return ResponseEntity.ok().build();
+        ResponseEntity<Void> response;
+        try {
+            response = this.persons.update(person) ? ResponseEntity.ok().build()
+            : ResponseEntity.status(304).build();
+        } catch (NoSuchElementException e) {
+            response = ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            response = ResponseEntity.internalServerError().build();
+        }
+        return response;
     }
 
     /**
@@ -78,7 +89,13 @@ public class PersonController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
-        this.persons.delete(id);
-        return ResponseEntity.ok().build();
+        ResponseEntity<Void> response;
+        try {
+            response = this.persons.delete(id) ? ResponseEntity.ok().build()
+            : ResponseEntity.status(304).build();
+        } catch (Exception e) {
+            response = ResponseEntity.internalServerError().build();
+        }
+        return response;
     }
 }

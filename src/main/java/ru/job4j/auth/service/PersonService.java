@@ -10,6 +10,7 @@ import ru.job4j.auth.model.Person;
 import ru.job4j.auth.repository.PersonRepository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -48,18 +49,39 @@ public class PersonService {
     /**
      * Сервис обновляет сущность Person в хранилище сервера
      * @param person - сохраняемая сущность тип {@link ru.job4j.auth.model.Person}
-     * @return тип {@link ru.job4j.auth.model.Person}
+     * @return тип boolean
+     * true  - если пользователь обновлён
+     * false - если без изменений
+     * @throws NoSuchElementException - если пользователя нет в хранилище
      */
-    public Person update(Person person) {
-        return this.persons.save(person);
+    public boolean update(Person person) {
+        Optional<Person> person1 = this.persons.findById(person.getId());
+        if (person1.isEmpty()) {
+            throw new NoSuchElementException(
+                    "Пользователь {id=" + person.getId()
+                            + "; login=" + person.getLogin()
+                            + "; password" + person.getPassword()
+                            + "} не обновлён т.к. не найден");
+        }
+        if (person1.get().getPassword().equals(person.getPassword())
+                && person1.get().getLogin().equals(person.getLogin())) {
+            return false;
+        }
+        this.persons.save(person);
+        return true;
     }
 
     /**
      * Сервис удаляет сущность Person в хранилище сервера по {@param id}
      * @param id - удаляемая сущность тип int.
+     * @return тип boolean
+     * true  - пользователь c ID удален
+     * false - пользователь c ID не найден
      */
-    public void delete(int id) {
-        this.persons.deleteById(id);
+    public boolean delete(int id) {
+        Optional<Person> person = this.persons.findById(id);
+        person.ifPresent(p -> this.persons.deleteById(id));
+        return person.isPresent();
     }
 
     /**
