@@ -1,12 +1,10 @@
 package ru.job4j.auth.controller;
 
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.util.Streamable;
+import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.auth.model.Person;
-import ru.job4j.auth.repository.PersonRepository;
 import ru.job4j.auth.service.PersonService;
 
 import java.util.List;
@@ -18,6 +16,7 @@ import java.util.NoSuchElementException;
 @RestController
 @RequestMapping("/person")
 public class PersonController {
+    final static Logger LOGGER = Logger.getLogger(PersonController.class);
     private final PersonService persons;
 
     public PersonController(final PersonService persons) {
@@ -73,10 +72,12 @@ public class PersonController {
         ResponseEntity<Void> response;
         try {
             response = this.persons.update(person) ? ResponseEntity.ok().build()
-            : ResponseEntity.status(304).build();
+            : ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         } catch (NoSuchElementException e) {
+            LOGGER.error("PUT /person/ " + e.getMessage());
             response = ResponseEntity.notFound().build();
         } catch (Exception e) {
+            LOGGER.error("PUT /person/ " + e.getMessage());
             response = ResponseEntity.internalServerError().build();
         }
         return response;
@@ -92,8 +93,9 @@ public class PersonController {
         ResponseEntity<Void> response;
         try {
             response = this.persons.delete(id) ? ResponseEntity.ok().build()
-            : ResponseEntity.status(304).build();
+            : ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         } catch (Exception e) {
+            LOGGER.error("DELETE /person/" + id + " " + e.getMessage());
             response = ResponseEntity.internalServerError().build();
         }
         return response;

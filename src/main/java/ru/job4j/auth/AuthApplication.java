@@ -12,10 +12,7 @@ public class AuthApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(AuthApplication.class, args);
-		System.out.println("start REST http://localhost:8080/users/");
-		System.out.println("http://localhost:8080/users/sign-up");
-		System.out.println("http://localhost:8080/login");
-		System.out.println("http://localhost:8080/users/all");
+		System.out.println("start REST http://localhost:8080/person/");
 	}
 
 }

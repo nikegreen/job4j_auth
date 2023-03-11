@@ -2,6 +2,8 @@ package ru.job4j.auth;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest

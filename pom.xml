@@ -15,6 +15,7 @@
 	<description>job4j Rest API</description>
 	<properties>
 		<java.version>17</java.version>
+		<log4j.version>1.2.17</log4j.version>
 	</properties>
 
 	<profiles>
@@ -58,6 +59,7 @@
 <!--			<artifactId>java-jwt</artifactId>-->
 <!--			<version>3.4.0</version>-->
 <!--		</dependency>-->
+
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
@@ -84,6 +86,11 @@
 			<artifactId>h2</artifactId>
 			<version>2.1.214</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>${log4j.version}</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -130,5 +137,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
