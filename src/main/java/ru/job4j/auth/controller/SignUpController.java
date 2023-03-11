@@ -12,13 +12,13 @@ import ru.job4j.auth.service.UserDetailsServiceImpl;
  * curl.exe -H "Content-Type: application/json" -X POST -d '{
  * >>     \"login\": \"admin3\",
  * >>     \"password\": \"password\"
- * >> }' http://localhost:8080/person/sign-up
+ * >> }' http:/ /localhost:8080/person/sign-up
  * -------------------------------------
  * Пример входа:
  * curl.exe -i -H "Content-Type: application/json" -X POST -d '{
  * >>     \"login\": \"admin3\",
  * >>     \"password\": \"password\"
- * >> }' http://localhost:8080/login
+ * >> }' http:/ /localhost:8080/login
  * -------------------------------------
  * Ответ:
  * HTTP/1.1 200
@@ -40,7 +40,7 @@ import ru.job4j.auth.service.UserDetailsServiceImpl;
  * curl.exe -H "Authorization: Bearer eyJ0eXAiOiJKV1SiLCJhbGciOiJIUzUxMiJ1.
  * EyJzdWIiOiJhZG1pbjMiLCJleHAiOjE2NzkzODkxMDJ0.c_CvS9Xg0f4Glkt7bGUa9miUE-
  * bJcs7KeIrQufZocvljH9hTu9PVr31dvyLfRyXso7tZLmkEYtWybqjHVBRNKM"
- * -X GET http://localhost:8080/person/
+ * -X GET http:/ /localhost:8080/person/
  */
 @RestController
 @RequestMapping("/person")
@@ -62,7 +62,7 @@ public class SignUpController {
      * curl.exe -H "Content-Type: application/json" -X POST -d '{
      * >>     \"login\": \"admin3\",
      * >>     \"password\": \"password\"
-     * >> }' http://localhost:8080/person/sign-up
+     * >> }' http:/ /localhost:8080/person/sign-up
      */
     @PostMapping("/sign-up")
     public void signUp(@RequestBody Person person) {
