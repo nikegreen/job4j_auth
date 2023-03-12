@@ -4,6 +4,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.auth.model.Person;
 import ru.job4j.auth.service.UserDetailsServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Контроллер для регистрации Person
@@ -45,13 +53,26 @@ import ru.job4j.auth.service.UserDetailsServiceImpl;
 @RestController
 @RequestMapping("/person")
 public class SignUpController {
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(SignUpController.class.getSimpleName());
     private final UserDetailsServiceImpl users;
     private final BCryptPasswordEncoder encoder;
+    private final ObjectMapper objectMapper;
 
+    /**
+     * Конструктор
+     * @param users тип {@link ru.job4j.auth.service.UserDetailsServiceImpl}
+     *              сервис для авторизации пользователя
+     * @param encoder тип {@link org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder}
+     *                шифровальщик пароля
+     * @param objectMapper тип {@link com.fasterxml.jackson.databind.ObjectMapper}
+     */
     public SignUpController(UserDetailsServiceImpl users,
-                            BCryptPasswordEncoder encoder) {
+                            BCryptPasswordEncoder encoder,
+                            ObjectMapper objectMapper) {
         this.users = users;
         this.encoder = encoder;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -66,7 +87,42 @@ public class SignUpController {
      */
     @PostMapping("/sign-up")
     public void signUp(@RequestBody Person person) {
+        if (person == null
+                || person.getLogin() == null
+                || person.getPassword() == null
+        ) {
+            throw new NullPointerException("login and password mustn't be empty");
+        }
+        if (person.getPassword().length() < 1) {
+            throw new IllegalArgumentException("Invalid username or password");
+        }
         person.setPassword(encoder.encode(person.getPassword()));
         users.create(person);
+    }
+
+    /**
+     * Обработчик IllegalArgumentException исключения в SignUpController
+     * @param e тип {@link java.lang.Exception} исключение
+     * @param request тип {@link javax.servlet.http.HttpServletRequest} HTTP запрос
+     * @param response тип {@link javax.servlet.http.HttpServletResponse} HTTP ответ
+     * @throws IOException в случае ошибки ввода/вывода
+     * ---------------------------------------------------------------------
+     * Важно! Если Вы используете Spring Boot, то в целях безопасности
+     * он ограничивает отображение сообщения ошибки.
+     * Для того чтобы оно появилось в теле ответа,
+     * добавьте следующую строку в application.properties:
+     * server.error.include-message=always
+     */
+    @ExceptionHandler(value = { IllegalArgumentException.class })
+    public void exceptionHandler(Exception e,
+                                 HttpServletRequest request,
+                                 HttpServletResponse response) throws IOException {
+        response.setStatus(HttpStatus.NOT_FOUND.value());
+        response.setContentType("application/json");
+        response.getWriter().write(objectMapper.writeValueAsString(new HashMap<>() { {
+            put("message", e.getMessage());
+            put("type", e.getClass());
+        }}));
+        LOGGER.error(e.getLocalizedMessage());
     }
 }
