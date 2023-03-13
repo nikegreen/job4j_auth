@@ -7,9 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.auth.model.Person;
 import ru.job4j.auth.service.PersonService;
-
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Rest контроллер для Person
@@ -116,5 +119,47 @@ public class PersonController {
         ) {
             throw new NullPointerException(headMsg + "login and password mustn't be empty");
         }
+    }
+
+    /**
+     * метод PATCH для модели Person
+     * @param person пользователь - поля: id, login, password.
+     *               Поле id обязательно и должно быть целым положительным числом
+     * @return тип {@link ru.job4j.auth.model.Person} обновлённый пользователь из хранилища
+     * @throws InvocationTargetException ошибка
+     * @throws IllegalAccessException ошибка
+     */
+    @PatchMapping("/updatePatchMappingExample")
+    public Person updatePatchMappingExample(@RequestBody Person person)
+            throws InvocationTargetException, IllegalAccessException {
+        var current = persons.findById(person.getId()).orElse(null);
+        if (current == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        var methods = current.getClass().getDeclaredMethods();
+        var namePerMethod = new HashMap<String, Method>();
+        for (var method: methods) {
+            var name = method.getName();
+            if (name.startsWith("get") || name.startsWith("set")) {
+                namePerMethod.put(name, method);
+            }
+        }
+        for (var name : namePerMethod.keySet()) {
+            if (name.startsWith("get")) {
+                var getMethod = namePerMethod.get(name);
+                var setMethod = namePerMethod.get(name.replace("get", "set"));
+                if (setMethod == null) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Impossible invoke set method from object : "
+                                    + current + ", Check set and get pairs.");
+                }
+                var newValue = getMethod.invoke(person);
+                if (newValue != null) {
+                    setMethod.invoke(current, newValue);
+                }
+            }
+        }
+        persons.update(current);
+        return current;
     }
 }
