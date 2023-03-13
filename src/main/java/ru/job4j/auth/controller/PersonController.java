@@ -1,5 +1,6 @@
 package ru.job4j.auth.controller;
 
+import com.sun.istack.NotNull;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +56,7 @@ public class PersonController {
      */
     @PostMapping("/")
     public ResponseEntity<Person> create(@RequestBody Person person) {
+        validatePerson(person, "Create: ");
         return new ResponseEntity<Person>(
                 this.persons.create(person),
                 HttpStatus.CREATED
@@ -69,6 +71,7 @@ public class PersonController {
      */
     @PutMapping("/")
     public ResponseEntity<Void> update(@RequestBody Person person) {
+        validatePerson(person, "Update: ");
         ResponseEntity<Void> response;
         try {
             response = this.persons.update(person) ? ResponseEntity.ok().build()
@@ -99,5 +102,19 @@ public class PersonController {
             response = ResponseEntity.internalServerError().build();
         }
         return response;
+    }
+
+    /**
+     * Проверка заполнения полей пользователя
+     * @param person пользователь тип {@link ru.job4j.auth.model.Person}
+     * @param headMsg начало сообщения 'login and password mustn't be empty'
+     */
+    private void validatePerson(Person person, @NotNull String headMsg) {
+        if (person == null
+                || person.getLogin() == null
+                || person.getPassword() == null
+        ) {
+            throw new NullPointerException(headMsg + "login and password mustn't be empty");
+        }
     }
 }
