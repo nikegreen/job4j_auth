@@ -4,6 +4,7 @@ import com.sun.istack.NotNull;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.auth.model.Person;
 import ru.job4j.auth.service.PersonService;
@@ -13,6 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.web.server.ResponseStatusException;
+import ru.job4j.auth.util.Operation;
+
+import javax.validation.Valid;
 
 /**
  * Rest контроллер для Person
@@ -43,7 +47,8 @@ public class PersonController {
      * @return тип {@link org.springframework.http.ResponseEntity<ru.job4j.auth.model.Person>}
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Person> findById(@PathVariable int id) {
+    @Validated(Operation.OnFind.class)
+    public ResponseEntity<Person> findById(@Valid @PathVariable int id) {
         var person = this.persons.findById(id);
         return new ResponseEntity<Person>(
                 person.orElse(new Person()),
@@ -58,7 +63,8 @@ public class PersonController {
      * содержит результат попытки добавить сущность Person.
      */
     @PostMapping("/")
-    public ResponseEntity<Person> create(@RequestBody Person person) {
+    @Validated(Operation.OnCreate.class)
+    public ResponseEntity<Person> create(@Valid @RequestBody Person person) {
         validatePerson(person, "Create: ");
         return new ResponseEntity<Person>(
                 this.persons.create(person),
@@ -73,7 +79,8 @@ public class PersonController {
      *  status = 304 - не изменено. Если не поменялось содержимое.
      */
     @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestBody Person person) {
+    @Validated(Operation.OnUpdate.class)
+    public ResponseEntity<Void> update(@Valid @RequestBody Person person) {
         validatePerson(person, "Update: ");
         ResponseEntity<Void> response;
         try {
@@ -95,7 +102,8 @@ public class PersonController {
      * @return тип {@link org.springframework.http.ResponseEntity<java.lang.Void>}
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable int id) {
+    @Validated(Operation.OnDelete.class)
+    public ResponseEntity<Void> delete(@Valid @PathVariable int id) {
         ResponseEntity<Void> response;
         try {
             response = this.persons.delete(id) ? ResponseEntity.ok().build()
@@ -130,7 +138,8 @@ public class PersonController {
      * @throws IllegalAccessException ошибка
      */
     @PatchMapping("/updatePatchMappingExample")
-    public Person updatePatchMappingExample(@RequestBody Person person)
+    @Validated(Operation.OnUpdate.class)
+    public Person updatePatchMappingExample(@Valid @RequestBody Person person)
             throws InvocationTargetException, IllegalAccessException {
         var current = persons.findById(person.getId()).orElse(null);
         if (current == null) {

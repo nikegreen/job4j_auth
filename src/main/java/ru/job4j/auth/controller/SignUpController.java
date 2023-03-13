@@ -1,6 +1,7 @@
 package ru.job4j.auth.controller;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.auth.model.Person;
 import ru.job4j.auth.service.UserDetailsServiceImpl;
@@ -8,8 +9,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import ru.job4j.auth.util.Operation;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -86,7 +90,8 @@ public class SignUpController {
      * >> }' http:/ /localhost:8080/person/sign-up
      */
     @PostMapping("/sign-up")
-    public void signUp(@RequestBody Person person) {
+    @Validated(Operation.OnCreate.class)
+    public void signUp(@Valid @RequestBody Person person) {
         if (person == null
                 || person.getLogin() == null
                 || person.getPassword() == null
